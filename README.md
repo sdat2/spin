@@ -4,10 +4,25 @@
  <a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
 
 ## Requirements
-- Python 3.8+
+ - Python 3.8+
+ - `numpy`
+ - `scipy`
+ - `matplotlib`
+ - `xarray`
 
 ## Getting started
 
+To create the conda environment from the requirements:
+
+```bash
+make create_environment
+```
+
+Run the simulation:
+
+```bash
+python3 main.py
+```
 
 ## Project Organization
 ```
