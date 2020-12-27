@@ -12,6 +12,7 @@ import time
 import src.plotting.plotters as plot
 import src.simulation.sclass
 from scipy.integrate import solve_ivp  # not currently used
+import src.time_wrapper as twr
 
 
 def _prec(*args, **kwargs):
@@ -272,7 +273,7 @@ def tot_am(particles):
 # -------------------------Run Simulation Steps---------
 
 
-@timeit
+@twr.timeit
 def spinner(co, sy, particles, **kwargs):
     """Runs simulation steps whilst making a """
     print(
@@ -309,13 +310,13 @@ def spinner(co, sy, particles, **kwargs):
             print("There have been " + str(f) + " simulation steps.")
         if f % 5000 == 0:
             print("Take snap shot now.")
-            snap_shot(co, particles, move_with=True, Time=sy.timer[f])
+            plot.snap_shot(co, particles, move_with=True, Time=sy.timer[f])
 
     sy.short_timer = np.array(sy.short_timer)  # recast into numpy array
     return co, sy, particles
 
 
-@timeit
+@twr.timeit
 def spin_forward(time, co, particles=[], **kwargs):
     """A function that continues to
     simulate the galaxy without graphing,

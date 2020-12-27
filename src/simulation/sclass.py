@@ -64,7 +64,7 @@ class System:
         self.Total_Energies["Total"] = np.zeros(shortened_length)
         self.Angular_Momentum = dict()
         self.Angular_Momentum["Total"] = np.zeros((3, shortened_length))
-        if co.calculate_am == True:
+        if co.calculate_am:
             for part in particles:  # This takes up lots of memory, disable if required.
                 if part.forceful:  # only for non test masses
                     self.Angular_Momentum[part.no] = np.zeros((3, shortened_length))

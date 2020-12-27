@@ -5,11 +5,13 @@ and plot them to produce an effective animation """
 import os  # needed for making dircetories.
 import numpy as np
 import matplotlib.pyplot as plt
-from my_plotting_style import *
-from sclass import *
+import src.plotting.my_plotting_style as mps
+import src.simulation.sclass as scl
+import src.time_wrapper as twr
 import os
 
 
+@twr.timeit
 def plot_energy(co, sy):
     """ Plot Energies"""
     print("plotting energies with the name " + co.name)
@@ -34,6 +36,7 @@ def plot_energy(co, sy):
     plt.clf()  # clear the figure
 
 
+@twr.timeit
 def plot_angular_momentum(co, sy):
     """ Plot Angular Momentum """
     print("plotting angular momentum with the name " + co.name)
@@ -52,6 +55,7 @@ def plot_angular_momentum(co, sy):
     plt.clf()
 
 
+@twr.timeit
 def plot_multi_AM(co, sy):
     """Plot many angular momentums"""
     print("plotting angular momentums with the name " + co.name)
@@ -72,7 +76,7 @@ def plot_multi_AM(co, sy):
     plt.clf()  # clear the figure
 
 
-@timeit
+@twr.timeit
 def snap_shot(co, particles, move_with=True, Time=-1000):
     """Take a snap shot at a point in the simulation.
     Possibly include some Velocity information"""

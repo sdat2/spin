@@ -5,7 +5,7 @@ Import into any script that plots Figures for the report.
 Incurs a large time penalty, which is worth it for final plots.
 Blank entries should cause plots to inherit fonts from the document."""
 
-import matplotlib
+# import matplotlib
 
 pgf_latex = {
     "pgf.texsystem": "pdflatex",
@@ -27,11 +27,11 @@ pgf_latex = {
     ],
 }
 
-matplotlib.rcParams["text.latex.preamble"] = [
-    "\\usepackage[separate -uncertainty=true]{siunitx}"
-]
+# matplotlib.rcParams["text.latex.preamble"] = [
+#     "\\usepackage[separate -uncertainty=true]{siunitx}"
+# ]
 
-matplotlib.rcParams.update(pgf_latex)
+# matplotlib.rcParams.update(pgf_latex)
 
 # ---text sizes are meaningless if LaTeX squashes figure---
 

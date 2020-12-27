@@ -29,12 +29,16 @@ class AniMP4:
         # set up figure and animation
         self.move_with = move_with
         self.name = name
-        #  Replot Energies etc.
+        self.algorithm_title = None
+        self.algorithm_text = None
+        self.timestep_text = None
+        self.length_softening_distance = None
+        # replot Energies etc.
         with plt.style.context(("fivethirtyeight")):  # plot the normal things
             plt.clf()
-            plot_energy(self.co, self.sy)
-            plot_angular_momentum(self.co, self.sy)
-            plot_multi_AM(self.co, self.sy)
+            plot.plot_energy(self.co, self.sy)
+            plot.plot_angular_momentum(self.co, self.sy)
+            plot.plot_multi_AM(self.co, self.sy)
         with plt.style.context(("dark_background")):
             self.fig = plt.figure()  # the main animation figure
             self.ax = self.fig.add_subplot(
@@ -63,8 +67,8 @@ class AniMP4:
                     [0], [0], color="green", marker="+", label="Galaxy B"
                 )
             if self.no_particles > 10:
-                if self.co.halo == True:
-                    if self.move_with == True:
+                if self.co.halo:
+                    if self.move_with:
                         print("I want to plot a Halo.")
             print("May have plotted Halo if needed")
 
@@ -148,7 +152,7 @@ class AniMP4:
         plt.tight_layout()  # This supposedly makes stops the label from falling off.
         a = self.sy.coordinate_grid[0, 0, i]
         b = self.sy.coordinate_grid[1, 0, i]
-        if self.move_with == False:  # inertial frame
+        if self.move_with:  # inertial frame
             self.line.set_data(
                 self.sy.coordinate_grid[0, :, i], self.sy.coordinate_grid[1, :, i]
             )
@@ -156,7 +160,7 @@ class AniMP4:
             self.impactor.set_data(
                 self.sy.coordinate_grid[0, -1, i], self.sy.coordinate_grid[1, -1, i]
             )
-        if self.move_with == True:  # comoving frame
+        if self.move_with:  # comoving frame
             self.line.set_data(
                 self.sy.coordinate_grid[0, :, i] - a,
                 self.sy.coordinate_grid[1, :, i] - b,

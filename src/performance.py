@@ -6,15 +6,17 @@ By testing them for energy and angular momentum conservation"""
 import os
 import copy
 import numpy as np
-from src.simulation.helpers import *
+import pickle
+import src.simulation.helpers as hlp
 from scipy.optimize import curve_fit
 import src.data_loading.io_pickles as ip
 import src.simulation.sclass
 import src.plotting.my_plotting_style as mps
+import src.plotting.animator as ani
 import matplotlib.pyplot as plt
-import pickle
-from src.simulation.sclass import *
+import src.simulation.sclass as scl
 import src.time_wrapper as twr
+import src.simulation.halos as hal
 
 
 @twr.timeit
@@ -24,7 +26,7 @@ def _circular_orbit(seperation=2, algo="vv", tstep=0.05):
     and turn that into a list of two particles at the right speed
     and distance.
     """
-    co = Controls(
+    co = scl.Controls(
         MAXTIMER=20,
         TSTEP=tstep,
         algorithm=algo,
@@ -34,7 +36,7 @@ def _circular_orbit(seperation=2, algo="vv", tstep=0.05):
     speed = np.sqrt(co.GM / 2 / seperation)
     particles = []
     particles.append(
-        Particle(
+        hal.Particle(
             np.array([-seperation / 2, 0, 0]),
             np.array([0, speed, 0]),
             1.0,
@@ -43,7 +45,7 @@ def _circular_orbit(seperation=2, algo="vv", tstep=0.05):
         )
     )
     particles.append(
-        Particle(
+        hal.Particle(
             np.array([-seperation / 2, 0, 0]),
             np.array([0, speed, 0]),
             1.0,
@@ -54,7 +56,7 @@ def _circular_orbit(seperation=2, algo="vv", tstep=0.05):
     tmp_log_data = {}
     co, sy, particles = spinner(co, sy, particles, log_time=tmp_log_data)
     time_taken = tmp_log_data["SPINNER"]
-    write_out(co, sy)
+    hlp.write_out(co, sy)
     return time, energy, time_taken
 
 
@@ -207,9 +209,9 @@ def particle_build_up(OM=5):
             tot_particles_d[key].append(
                 len(particles)
             )  # how many particles in this key
-            co = Controls(TSTEP=0.05, algorithm=key)
+            co = scl.Controls(TSTEP=0.05, algorithm=key)
             tmp_log_data = {}
-            part = spin_forward(
+            part = hal.spin_forward(
                 400, co, particles=copy.deepcopy(particles), log_time=tmp_log_data
             )  # chuck it into part to stop interference.
             assert part != particles
@@ -219,24 +221,24 @@ def particle_build_up(OM=5):
         for key in spinner_time:
             tot_particles_d[key + "_spin"].append(len(particles))
             sub = key + "_running_time_test_" + str(len(particles))
-            co = Controls(
+            co = scl.Controls(
                 OUT="./Run_Time_TEST/" + sub,
                 MAXTIMER=400,
                 TSTEP=0.05,
                 algorithm=key,
                 name=sub,
             )
-            sy = System(co, particles=particles)
+            sy = scl.System(co, particles=particles)
             tmp_log_data = {}
-            co, sy, part = spinner(
+            co, sy, part = hal.spinner(
                 co, sy, copy.deepcopy(particles), log_time=tmp_log_data
             )
             # chuck it into part to stop interference.
             assert part != particles
             spinner_time[key].append(tmp_log_data["SPINNER"])  # extract spinner time
             # What about the animation of those particles?
-            write_out(co, sy)
-            aniclass_member = AniMP4(co.out, name=co.name, move_with=True)
+            hlp.write_out(co, sy)
+            aniclass_member = ani.AniMP4(co.out, name=co.name, move_with=True)
             # initiate animator
             animate = True
             if key == "vv" and animate == True:
@@ -376,7 +378,7 @@ def _fill_up(radii, num_particles, required_total, **kwargs):
 def _calculate_vs_and_ps(radiiA, num_particlesB, **kwargs):
     """ Calculate vs and ps"""
     particles = []
-    co = Controls()  # the controls really don't matter in this instance.
+    co = scl.Controls()  # the controls really don't matter in this instance.
     countA = 0
     for i in range(len(radiiA)):
         countB = 0  # CountB is number in a Particular Ring
@@ -385,7 +387,7 @@ def _calculate_vs_and_ps(radiiA, num_particlesB, **kwargs):
             countB += 1
             if radiiA[i] == 0:
                 particles.append(
-                    Particle(
+                    hal.Particle(
                         np.array([0.0, 0.0, 0.0]),
                         np.array([0.0, 0.0, 0.0]),
                         1.0,
@@ -394,9 +396,9 @@ def _calculate_vs_and_ps(radiiA, num_particlesB, **kwargs):
                     )
                 )
             else:
-                pos = circular_position(radiiA[i], num_particlesB[i], j)
-                vel = circular_velocity(radiiA[i], num_particlesB[i], j, co)
-                particles.append(Particle(pos, vel, 1.0, False, countA))
+                pos = hlp.circular_position(radiiA[i], num_particlesB[i], j)
+                vel = hlp.circular_velocity(radiiA[i], num_particlesB[i], j, co)
+                particles.append(hal.Particle(pos, vel, 1.0, False, countA))
     return particles
 
 
@@ -408,7 +410,7 @@ def two_body_test():
     print("lets test two bodies for a long time")
 
 
-@timeit
+@twr.timeit
 def _perf_test_plotter():
     """A function designed to test whether the timeit
     wrapper worked"""
