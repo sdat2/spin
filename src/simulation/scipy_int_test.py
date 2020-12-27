@@ -3,5 +3,5 @@
 A program just for testing the new scipy.integrate functionality
 without doing anything else.
 """
-from halos import *
-from helpers import *
+import src.simulation.halos as hal
+import src.simulation.helpers as hlp

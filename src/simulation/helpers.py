@@ -7,39 +7,41 @@ the gravitational particles at a more meta level.
 
 """
 import os  # needed for creating output directory
-from halos import *
-from sclass import *
-from animator import *
+import numpy as np
+import src.simulation.halos as hal
+import src.simulation.sclass as scl
+import src.plotting.animator as ani
+import src.time_wrapper as twr
 import pickle
 
 
 def circular_position(radius, number_particles, member):
     """Returns the initial position of a particle."""
-    angle = 2 * np.pi / (number_particles) * member
+    angle = 2 * np.pi / number_particles * member
     position = np.array([np.cos(angle), np.sin(angle), 0]) * radius
     return position
 
 
 def circular_velocity(radius, number_particles, member, co):
     """Returns the velocity needed for circular motion."""
-    angle = 2 * np.pi / (number_particles) * member
+    angle = 2 * np.pi / number_particles * member
     co.GM = 1
     co.radius = 7
     if co.halo:
-        speed = np.sqrt(co.GM * (radius ** 2) / ((co.radius) ** 3))
+        speed = np.sqrt(co.GM * (radius ** 2) / (co.radius ** 3))
     else:
         speed = np.sqrt(co.GM / radius)
     velocity = np.array([-np.sin(angle), np.cos(angle), 0]) * speed
     return velocity
 
 
-@timeit
+@twr.timeit
 def galaxy_creator(co, clockwise, radii=[], num_particles=[], **kwargs):
     """creates the particles spinning"""
     particles = []  # Empty list to fill with particles
     countA = 0  # CountA is indice of the particle
     particles.append(
-        Particle(
+        hal.Particle(
             np.array([0.0, 0.0, 0.0]),
             np.array([0.0, 0.0, 0.0]),
             1.0,
@@ -59,12 +61,13 @@ def galaxy_creator(co, clockwise, radii=[], num_particles=[], **kwargs):
                 if clockwise:
                     vel = -vel
                     # reverse direction of cloud
-                particles.append(Particle(pos, vel, 1.0, False, countA))
+                particles.append(hal.Particle(pos, vel, 1.0, False, countA))
     for i in range(len(particles)):
         particles[i].gravp_energy(particles)
     return particles
 
 
+@twr.timeit
 def impactor_adder(particles, x0=-25.0, y0=45.0, mass=0.22):
     """
     Computes the correct parabolic orbit given a staring position and
@@ -73,15 +76,16 @@ def impactor_adder(particles, x0=-25.0, y0=45.0, mass=0.22):
     x_vec = [x0, y0, 0.0]
     x_dot_vec = [0, -np.sqrt(2 * (1 + mass) / (np.sqrt((x0) ** 2 + (y0) ** 2))), 0.0]
     particles.append(
-        Particle(np.array(x_vec), np.array(x_dot_vec), mass, True, len(particles))
+        hal.Particle(np.array(x_vec), np.array(x_dot_vec), mass, True, len(particles))
     )
     return particles
 
 
+@twr.timeit
 def three_particle_adder(co, particles):
     """creates the particles for the the Three Body Problem Test"""
     particles.append(
-        Particle(
+        hal.Particle(
             np.array([0.0, 0.0, 0.0]),
             np.array([0.0, 0.0, 0.0]),
             1.0,
@@ -101,7 +105,7 @@ def three_particle_adder(co, particles):
         )
     )
     particles.append(
-        Particle(
+        hal.Particle(
             np.array([0.0, -5, 0]),
             np.array([-0.5, 0.2, 0.0]),
             1.0,
@@ -115,11 +119,12 @@ def three_particle_adder(co, particles):
     return particles
 
 
+@twr.timeit
 def arbitrary_particle_adder(co, particles, pos_list=[], vel_list=[], mass_list=[]):
     """ Adds some more particles."""
     for i in range(len(pos_list)):
         particles.append(
-            Particle(
+            hal.Particle(
                 np.array(pos_list[i]),
                 np.array(vel_list[i]),
                 mass_list[i],
@@ -131,7 +136,7 @@ def arbitrary_particle_adder(co, particles, pos_list=[], vel_list=[], mass_list=
     return particles
 
 
-@timeit
+@twr.timeit
 def write_out(co, sy, **kwargs):
     """Writes output so that it can be animated"""
     if not os.path.exists(co.out):  # make the directory thing
@@ -143,32 +148,34 @@ def write_out(co, sy, **kwargs):
         pickle.dump(sy, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 
+@twr.timeit
 def middle_manager(
     co, sy, name, particles, recalculate=True, animate=False, scipy_test=False
 ):
     """
     Tells the Spinner to run, and then the animator to run.
     """
-    if recalculate == True:
+    if recalculate:
         # propogate galaxy and fill sy
-        if scipy_test == False:
-            co, sy, particles = spinner(co, sy, particles)
+        if not scipy_test:
+            co, sy, particles = hal.spinner(co, sy, particles)
         else:
-            sy, particles = scipy_spinner(co, sy, particles)
+            print('scipy_spinner not added')
+            # sy, particles = hal.scipy_spinner(co, sy, particles)
         write_out(co, sy)  # print sy and co to pickle files
-        print("There are " + str(len(particles)) + " particles in the simulation")
+        print("There are " + str(len(particles)) + " particles in the simulation.")
     for mv in [True]:  # turning off annoying animations
         if mv:
             print("Now animating " + name + " in comoving frame.")
         else:
             print("Now animating " + name + " in inertial frame.")
-        aniclass_member = AniMP4(co.out, name=name, move_with=mv)
+        aniclass_member = ani.AniMP4(co.out, name=name, move_with=mv)
         # initiate animator
-        if animate == True:
+        if animate:
             aniclass_member.animate_starter()  # run animation / plots
 
 
-@timeit
+@twr.timeit
 def galaxy_collide(
     MAX_TIMER=600,
     VB=10,
@@ -205,7 +212,7 @@ def galaxy_collide(
         + "Halos"
         + str(halo)
     )
-    co = Controls(
+    co = scl.Controls(
         MAXTIMER=MAX_TIMER,
         TSTEP=TSTEP,
         vb=VB,
@@ -220,32 +227,33 @@ def galaxy_collide(
             name = "Retrograde" + sub
         else:
             name = "Prograde" + sub
-        sy = System(co, particles=particles)
+        sy = scl.System(co, particles=particles)
         co.name = name
-        if recalculate == True:
+        if recalculate:
             particles = galaxy_creator(
                 co, clock, radii=radii, num_particles=num_particles
             )
             particles = impactor_adder(particles, x0=x00, y0=y00, mass=m0)
-            particles = zmf_transform(particles)
-            sy = System(co, particles=particles)
+            particles = hal.zmf_transform(particles)
+            sy = scl.System(co, particles=particles)
         middle_manager(
             co, sy, name, particles=particles, recalculate=recalculate, animate=animate
         )
 
 
+@twr.timeit
 def two_body_circle(
     MAX_TIMER=600, VB=10, TSTEP=0.05, EP=0.01, recalculate=True, algorithm="vv"
 ):
     """Makes two bodies of equal mass circle round each other, for a long time
     to check any errors that might be extant in the functions"""
-    co = Controls(
+    co = scl.Controls(
         MAXTIMER=MAX_TIMER,
         TSTEP=TSTEP,
         vb=VB,
         halo=False,
         EPS=EP,
-        OUT="./Algo_Comp/" + sub,
+        OUT="./Algo_Comp/",
         calculate_am=True,
         algorithm=algorithm,
     )
@@ -256,7 +264,7 @@ def two_body_circle(
     arbitrary_particle_adder(co, particles, pos_list=p, vel_list=v, mass_list=m)
 
 
-@timeit
+@twr.timeit
 def three_body_collide(
     MAX_TIMER=600,
     VB=10,
@@ -271,7 +279,7 @@ def three_body_collide(
     """
     particles = []
     sub = str(MAX_TIMER) + "t_" + str(EP) + "e_" + str(TSTEP) + "dt_" + str(algorithm)
-    co = Controls(
+    co = scl.Controls(
         MAXTIMER=MAX_TIMER,
         TSTEP=TSTEP,
         vb=VB,
@@ -281,15 +289,16 @@ def three_body_collide(
         calculate_am=True,
         algorithm=algorithm,
     )
-    sy = System(co, particles=particles)
+    sy = scl.System(co, particles=particles)
     name = "TBP" + sub
     co.name = name
-    if recalculate == True:
+    if recalculate:
         particles = three_particle_adder(co, particles)
-        sy = System(co, particles=particles)
+        sy = scl.System(co, particles=particles)
     middle_manager(co, sy, name, particles=particles, recalculate=recalculate)
 
 
+@twr.timeit
 def many_body_collide(
     MAX_TIMER=600, VB=1000, TSTEP=0.0001, EP=0.01, recalculate=True, algorithm="vv"
 ):
@@ -298,7 +307,7 @@ def many_body_collide(
     """
     particles = []
     sub = str(MAX_TIMER) + "t_" + str(EP) + "e"
-    co = Controls(
+    co = scl.Controls(
         MAXTIMER=MAX_TIMER,
         TSTEP=TSTEP,
         vb=VB,
@@ -308,7 +317,7 @@ def many_body_collide(
         calculate_am=True,
         algorithm=algorithm,
     )
-    sy = System(co, particles=particles)
+    sy = scl.System(co, particles=particles)
     name = "MBP" + sub
     co.name = name
     p = [
@@ -326,9 +335,9 @@ def many_body_collide(
         [-0.2, 0.5, 0.0],
     ]
     m = [1, 1, 1, 1, 1]
-    if recalculate == True:
+    if recalculate:
         particles = arbitrary_particle_adder(
             co, particles, pos_list=p, vel_list=v, mass_list=m
         )
-        sy = System(co, particles=particles)
+        sy = scl.System(co, particles=particles)
     middle_manager(co, sy, name, particles=particles, recalculate=recalculate)

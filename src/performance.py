@@ -3,6 +3,8 @@
 different algorithms
 By testing them for energy and angular momentum conservation"""
 
+import os
+import copy
 import numpy as np
 from src.simulation.helpers import *
 from scipy.optimize import curve_fit
@@ -12,12 +14,10 @@ import src.plotting.my_plotting_style as mps
 import matplotlib.pyplot as plt
 import pickle
 from src.simulation.sclass import *
-import os
-import copy
-
-print("performance.py is running")
+import src.time_wrapper as twr
 
 
+@twr.timeit
 def _circular_orbit(seperation=2, algo="vv", tstep=0.05):
     """
     Take the desired seperation between the two equally sized masses,
@@ -58,12 +58,7 @@ def _circular_orbit(seperation=2, algo="vv", tstep=0.05):
     return time, energy, time_taken
 
 
-def circular_read_and_test():
-    """
-    This function will do useful things.
-    """
-
-
+@twr.timeit
 def circle_orbit_tester():
     """
     This function calls _circular_orbit a number of times
@@ -86,7 +81,7 @@ def circle_orbit_tester():
     _graph_circular_orbit(energy_remaining, simu_time, time_taken)
 
 
-@timeit
+@twr.timeit
 def three_body_test():
     """ Three body test with a variety of algorithms"""
     print("Let us try three body")
@@ -111,7 +106,7 @@ def three_body_test():
             tbc_time[algo].append(tmp_log_data["THREE_BODY_COLLIDE"])
 
 
-@timeit
+@twr.timeit
 def particle_build_up(OM=5):
     """A function which gradually fills up a galaxy with a variable number
     particles, trying each algorithm used in the simulation, allowing
@@ -264,6 +259,7 @@ def particle_build_up(OM=5):
     _fit_fill_up(name=name, animate=animate)
 
 
+@twr.timeit
 def _fit_fill_up(name="no_name", animate=True):
     """
     :param name: where to look for saved output
@@ -332,6 +328,7 @@ def _fit_fill_up(name="no_name", animate=True):
     _replot_fill_up(name)
 
 
+@twr.timeit
 def _replot_fill_up(name):
     data = ip.read_pickle_to_dict(name=name)
     linear_replotter(
@@ -343,7 +340,7 @@ def _replot_fill_up(name):
     )
 
 
-@timeit
+@twr.timeit
 def _fill_up(radii, num_particles, required_total, **kwargs):
     """
     This algorithm is fills up the rings up to the $\sim$ fermi
@@ -375,6 +372,7 @@ def _fill_up(radii, num_particles, required_total, **kwargs):
     return _calculate_vs_and_ps(radii_2, num_particles_2)
 
 
+@twr.timeit
 def _calculate_vs_and_ps(radiiA, num_particlesB, **kwargs):
     """ Calculate vs and ps"""
     particles = []
@@ -439,7 +437,7 @@ def _funct(x, a, b):
     return (a * x) + b
 
 
-@timeit
+@twr.timeit
 def linear_fitter(
     x_unlogged_values, y_unlogged_values, name_graph, x_unit="N", y_unit="t", **kwargs
 ):
@@ -473,6 +471,7 @@ def linear_fitter(
     return x_values, y_values, popt, perr
 
 
+@twr.timeit
 def plot_part(
     x_values,
     y_values,
@@ -514,6 +513,7 @@ def plot_part(
     plt.xlabel(r"$\log_{2}{" + x_unit + r"}$ ")
 
 
+@twr.timeit
 def linear_replotter(
     x_values_d,
     y_values_d,
@@ -588,7 +588,7 @@ def linear_replotter(
 # Added for SCM data processing rather than anything particularly useful.
 
 
-@timeit
+@twr.timeit
 def linear_fitter_nolog(
     x_values, y_values, name_graph, x_unit="N", y_unit="t", **kwargs
 ):
@@ -613,6 +613,7 @@ def linear_fitter_nolog(
     return x_values, y_values, popt, perr
 
 
+@twr.timeit
 def plot_part_nolog(
     x_values,
     y_values,

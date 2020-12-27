@@ -4,7 +4,8 @@ particle class works to effectively simulate a series of test masses
 Usage: python3 1_Schedule.py """
 
 ### Local Libraries ###
-import src.simulation.helpers as help
+import src.time_wrapper as twr
+import src.simulation.helpers as hlp
 
 # galaxy_collide(x00=-15, y00=20, m0=1, recalculate = False)
 # galaxy_collide(x00=-15, y00 =20, m0=0.2, MAX_TIMER=450, EP=0.01, recalculate = True)
@@ -14,10 +15,11 @@ import src.simulation.helpers as help
 # num_particles = [12, 18, 24, 30, 36]
 
 
+@twr.timeit
 def run_through_galaxy_sizes(halo=False):
     radii = [1.0, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5]
     num_particles = [15, 25, 35, 45, 50, 58, 70, 80, 90, 100, 110, 130]
-    help.galaxy_collide(
+    hlp.galaxy_collide(
         x00=-22,
         y00=22,
         m0=1,
@@ -39,9 +41,10 @@ def run_through_galaxy_sizes(halo=False):
 # galaxy_collide(FILE_DIR='./Ani_Re_Test/', MAX_TIMER=10, recalculate=True)
 
 
+@twr.timeit
 def run_through_impactors():
     for i in range(20):
-        help.galaxy_collide(
+        hlp.galaxy_collide(
             x00=2 * (-5 - i),
             y00=2 * (5 + i),
             m0=1.0,

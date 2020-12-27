@@ -6,15 +6,11 @@ explictly designed ot iterate over the particles.
 TODO: Add a test against scipy.integrate
 """
 
-import numpy as np
-
-# numpy is useful as it allows the program to have high speed and precision.
-from numpy import linalg as LA
-
-# linear algebra allows all the vectors to be dealt with appropriately.
+import numpy as np # numpy is useful as it allows the program to have high speed and precision.
+from numpy import linalg as LA # linear algebra allows all the vectors to be dealt with appropriately.
 import time
-from plotters import *
-from sclass import *
+import src.plotting.plotters as plot
+import src.simulation.sclass
 from scipy.integrate import solve_ivp  # not currently used
 
 
