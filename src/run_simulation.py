@@ -25,7 +25,7 @@ def run_through_galaxy_sizes(halo=False):
         x00=-22,
         y00=22,
         m0=1,
-        MAX_TIMER=400,
+        MAX_TIMER=450,
         TSTEP=0.05,
         radii=radii,
         num_particles=num_particles,
@@ -34,7 +34,7 @@ def run_through_galaxy_sizes(halo=False):
         recalculate=True,
         FILE_DIR="./Snap_Check/",
         halo=halo,
-        algorithm="herm",
+        algorithm="vv",
         animate=True,
     )
 

@@ -6,7 +6,7 @@ import src.run_simulation as rs
 
 # perf.particle_build_up(OM=8)
 
-for dark in [True]:
+for dark in [False, True]:
     rs.run_through_galaxy_sizes(halo=dark)
 
 # rs.run_through_impactors()
